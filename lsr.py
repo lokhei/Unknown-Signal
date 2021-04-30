@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
-
 def load_points_from_file(filename):
     """Loads 2d points from a csv called filename
     Args:
@@ -38,6 +37,8 @@ def view_data_segments(xs, ys, new_xs, new_ys):
     for i in range(num_segments):
         plt.plot(new_xs[i], new_ys[i])
        
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.show()
     
 
@@ -74,7 +75,7 @@ def sine_line(xs, ys):
 
 def square_error(y, y_hat):
     """
-    Calculate error in predicted line using sum squared error i.e. ∑𝑖(𝑦̂𝑖−𝑦𝑖)2  where 𝑦̂𝑖=𝑎+𝑏𝑥𝑖
+    Calculate error in predicted line using sum squared error i.e. ∑𝑖(𝑦̂𝑖−𝑦𝑖)2  
     """
     return np.sum((y - y_hat) ** 2)
 
@@ -119,9 +120,6 @@ def k_fold_cross_val(xs, ys, k):
         cve_linear += linear_cve(train_xs, train_ys, test_xs, test_ys)
         cve_poly += poly_cve(train_xs, train_ys, test_xs, test_ys)
         cve_sine += sine_cve(train_xs, train_ys, test_xs, test_ys)
-    # print(cve_linear/k)
-    # print(cve_poly/k)
-    # print(cve_sine/k)
     return cve_linear/k, cve_poly/k, cve_sine/k
 
    
@@ -135,21 +133,25 @@ if __name__ == '__main__':
     x_segments = np.split(points[0], len(points[0]) / 20)
     y_segments = np.split(points[1], len(points[1]) / 20)
     num_segments = len(x_segments)
+    
+
     total_error = 0
 
     new_xs_list = []
     new_ys_list =[]
-
+    function = []
     for i in range(num_segments):
         new_xs = np.linspace(min(x_segments[i]), max(x_segments[i]), 100)
-        cve_linear, cve_poly, cve_sine = k_fold_cross_val(x_segments[i], y_segments[i], 10)
+        cve_linear, cve_poly, cve_sine = k_fold_cross_val(x_segments[i], y_segments[i], 20)
         min_cve = min(cve_linear, cve_poly, cve_sine)
 
         if min_cve == cve_linear:
             weights = linear_line(x_segments[i], y_segments[i])
             ys_hat = test_ys_hat = np.column_stack((np.ones(x_segments[i].shape), x_segments[i])).dot(weights)
             error = square_error(y_segments[i], ys_hat)
-            new_ys = np.column_stack((np.ones(new_xs.shape), new_xs)).dot(weights)    
+            new_ys = np.column_stack((np.ones(new_xs.shape), new_xs)).dot(weights)
+            # print("linear")
+
 
 
         elif min_cve == cve_poly:
@@ -157,6 +159,8 @@ if __name__ == '__main__':
             ys_hat = np.column_stack((np.ones(x_segments[i].shape), x_segments[i], np.square(x_segments[i]), np.power(x_segments[i], 3))).dot(weights)
             error = square_error(y_segments[i], ys_hat)
             new_ys = np.column_stack((np.ones(new_xs.shape), new_xs, np.square(new_xs), np.power(new_xs, 3))).dot(weights)
+            # print("cubic")
+
 
 
         elif min_cve == cve_sine:
@@ -164,11 +168,14 @@ if __name__ == '__main__':
             ys_hat = np.column_stack((np.ones(x_segments[i].shape), np.sin(x_segments[i]))).dot(weights)
             error = square_error(y_segments[i], ys_hat)
             new_ys = np.column_stack((np.ones(new_xs.shape), np.sin(new_xs))).dot(weights)
+            # print("sine")
+
 
         new_xs_list.append(new_xs)
         new_ys_list.append(new_ys)
         total_error += error
 
+           
     print(total_error)
 
 
