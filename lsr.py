@@ -153,14 +153,12 @@ if __name__ == '__main__':
             # print("linear")
 
 
-
         elif min_cve == cve_poly:
             weights = poly_line(x_segments[i], y_segments[i])
             ys_hat = np.column_stack((np.ones(x_segments[i].shape), x_segments[i], np.square(x_segments[i]), np.power(x_segments[i], 3))).dot(weights)
             error = square_error(y_segments[i], ys_hat)
             new_ys = np.column_stack((np.ones(new_xs.shape), new_xs, np.square(new_xs), np.power(new_xs, 3))).dot(weights)
             # print("cubic")
-
 
 
         elif min_cve == cve_sine:
@@ -177,8 +175,6 @@ if __name__ == '__main__':
 
            
     print(total_error)
-
-
 
     # if --plot parameter given, visualise result
     if len(sys.argv) == 3 and sys.argv[2] == "--plot":
